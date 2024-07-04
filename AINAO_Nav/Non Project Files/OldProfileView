@@ -1,0 +1,247 @@
+
+//
+//  ProfileScreenView.swift
+//  EatSideStory
+//
+//  Created by FrancoisW on 20/06/2024.
+//
+
+import SwiftUI
+import PhotosUI
+
+/*
+struct ProfileScreenView: View {
+    
+    @State var userProfile : UserProfile // This is in fact an kind of @ObervedObject
+    @Binding var isEditingProfile : Bool // Track whether the profile sheet is open
+    
+    
+    @State  private var     photoPickerItem : PhotosPickerItem?
+    @State private var showingImagePicker = false
+
+    
+    var body: some View {
+
+        VStack {
+            ZStack {
+                Color(Theme.unbleach)
+                    .edgesIgnoringSafeArea(.all)
+                
+                VStack {
+                    // Image de profil
+                    ZStack {
+                        userProfile.profileImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                            .clipShape(Circle())
+                            .padding(.top,-150)
+                            .onTapGesture {
+                                showingImagePicker = true
+                            }
+                    }
+ 
+     
+                    
+                    
+                /*
+                        TextField("Enter your name", text: name)
+                                     .font(.title)
+                                   */
+                    
+                    Text("12078 KM")
+                        .padding()
+                        .padding(.top,-20)
+                    
+                    VStack {
+                        Text("Mes Critères:")
+                            .font(.headline)
+                            .bold()
+                            .padding(.leading, -170)
+                        
+                        HStack {
+                            Rectangle()
+                                .fill(Theme.color30)
+                                .frame(width: 120, height: 40)
+                                .cornerRadius(10.0)
+                                .overlay(
+                                    VStack {
+                                        Text("Wheelchair")
+                                            .foregroundColor(.black)
+                                            .font(.headline)
+                                    }
+                                )
+                            
+                            Rectangle()
+                                .fill(Color.yellow)
+                                .frame(width: 120, height: 40)
+                                .cornerRadius(10.0)
+                                .overlay(
+                                    VStack {
+                                        Text("Wheelchair")
+                                            .foregroundColor(.black)
+                                            .font(.headline)
+                                    }
+                                )
+                            
+                            Rectangle()
+                                .fill(Theme.color30)
+                                .frame(width: 120, height: 40)
+                                .cornerRadius(10.0)
+                                .overlay(
+                                    VStack {
+                                        Text("Wheelchair")
+                                            .foregroundColor(.black)
+                                            .font(.headline)
+                                    }
+                                )
+                        }
+                        
+                        POTEditView()
+
+                        Text("Mes Contributions:")
+                            .font(.headline)
+                            .bold()
+                            .padding(.leading, -170)
+                            .padding(.top, 40)
+                        
+                        HStack {
+                            Rectangle()
+                                .fill(Theme.color30)
+                                .frame(width: 120, height: 40)
+                                .cornerRadius(10.0)
+                                .padding(.top, -20)
+                                .overlay(
+                                    VStack {
+                                        Text("103 points")
+                                            .foregroundColor(.black)
+                                            .font(.headline)
+                                            .padding(.top, -20)
+                                    }
+                                )
+                        }
+                        .padding()
+                        
+                        Text("Mes Succés:")
+                            .font(.headline)
+                            .bold()
+                        
+                        HStack {
+                            Image("A")
+                                .padding()
+                            
+                            Image("B")
+                                .padding()
+                            
+                            Image("C")
+                                .padding()
+                        }
+                    }
+                    
+                    HStack {
+                        Rectangle()
+                            .fill(Theme.color30)
+                            .frame(width: 170, height: 130)
+                            .cornerRadius(10.0)
+                            .shadow(radius: 5)
+                            .padding(.bottom, -100)
+                            .overlay(
+                                VStack {
+                                    Text("Critère")
+                                        .foregroundColor(.black)
+                                        .font(.headline)
+                                        .padding(.top, 90)
+                                }
+                            )
+                        
+                        
+                        Rectangle()
+                            .fill(Theme.color30)
+                            .frame(width: 170, height: 130)
+                            .cornerRadius(10.0)
+                            .shadow(radius: 5)
+                            .padding(.bottom, -100)
+                            .overlay(
+                                VStack {
+                                    Text("Point d'intérêt")
+                                        .foregroundColor(.black)
+                                        .font(.headline)
+                                        .padding(.top, 90)
+                                } // fin vstack
+                            )
+                        
+                    } // fin hstack
+                } // fin vstack
+            } // fin zstack
+        } // fin vstack
+        /*
+        .task(id: photoPickerItem) {
+            if let item = photoPickerItem {
+                do {
+                    let data = try await item.loadTransferable(type: Data.self)
+                    profileImage.updateFromPhotoPicker(data: data)
+                } catch {
+                    // Handle errors here
+                    print("Error loading image: \(error)")
+                }
+            }
+        }
+         */
+/*
+        .sheet(isPresented: $showingImagePicker) {
+            PhotosPicker("            ",
+                         selection: $photoPickerItem,
+                         matching: .images)
+
+            ImagePicker(selectedImage: $profileImage)
+        } // sheet
+ */
+        
+        
+        
+        
+        
+    } // fin body
+} // fin struct
+
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
+    @Environment(\.presentationMode) private var presentationMode
+    
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        var parent: ImagePicker
+        
+        init(parent: ImagePicker) {
+            self.parent = parent
+        }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let uiImage = info[.originalImage] as? UIImage {
+                parent.selectedImage = uiImage
+            }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+}
+/*
+ #Preview {
+ ProfileScreenView()
+ }
+ */
+*/

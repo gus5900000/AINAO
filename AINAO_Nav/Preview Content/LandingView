@@ -1,0 +1,147 @@
+
+//
+//  LandingScreenView.swift
+//  EatSideStory
+//
+//  Created by FrancoisW on 15/06/2024.
+//
+
+
+import SwiftUI
+import MapKit
+
+
+struct LandingScreenView: View {
+    
+    @State var userProfile : UserProfile // This is in fact an @ObervedObject
+    @Binding  var isLandingScreenView : Bool
+    @Binding var cameraPosition: MapCameraPosition
+    
+    
+    @State private var isEditingProfile = false // Track whether the profile sheet is open
+    /*
+     TODO Needs some clean up here, these variable shall either be remo-ved from here and made optional in MapView() or they shall be provided as a binding and defined in a parent View
+     */
+    @State var visibleRegion: MKCoordinateRegion? // This is the region viewed by the user on the map, the region can change if the user moves the map or if the application re-position the map on a POI for instance. The main usage is for the search function
+    @State  var searchResults: [MKMapItem] = []
+    @State private var showMapScreenModalView: Bool = false
+    
+    var body: some View {
+        NavigationView { // Start of NavigationView
+            
+            ZStack {
+                Color(Theme.color60)
+                    .ignoresSafeArea()
+                
+                VStack{
+                    //
+                    //  CAUTION,Tricky area !!
+                    // This VStack contains the MapView which launches the Map() view from MapKit
+                    //  We want to prevent the user to interact with the child views, thus we put a shield on them (
+                    // This VStack contains the MapView which
+                    VStack{
+                        ZStack {
+                            // Call to MapView which will be protected by the shield
+                            MapView(isWidgetMode : true, userProfile : userProfile,isLandingScreenView: $isLandingScreenView,visibleRegion: $visibleRegion, searchResults: $searchResults,showMapScreenModalView: $showMapScreenModalView,cameraPosition : $cameraPosition)
+                                .frame(maxWidth: 400, maxHeight: 300) // Set the maximum width and height
+                                .background(RoundedRectangle(cornerRadius: Consts.UI.cornerRadiusFrame)
+                                    .fill(Theme.frame))
+                       
+                        
+                        // Here is the shield..
+                        Color.clear
+                            .contentShape(Rectangle()) // This ensures the entire area is tappable
+                            .onTapGesture {
+                                isLandingScreenView = false
+                            }
+                            .gesture(DragGesture().onChanged { _ in })
+                            .allowsHitTesting(true) // This allows the view to intercept touch events
+                    }
+                    
+                }
+                .shadow(radius: Consts.UI.shadowRadius)
+                .padding()
+                
+                VStack {
+                    Image(systemName: "figure.walk.motion.trianglebadge.exclamationmark")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundColor(Theme.color30)
+                        .frame(width:340, height: 150 )
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: Consts.UI.cornerRadiusFrame)
+                            .fill(Theme.frame))
+                        .shadow(radius: Consts.UI.shadowRadius)
+                    
+                    HStack {
+                        //                        Spacer()
+                        
+                        Image(systemName: "flame")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(Theme.color30)
+                        //      .frame(width : height: 150)
+                            .frame(maxWidth: 150, maxHeight: 150) // Set the maximum width and height
+                        
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: Consts.UI.cornerRadiusFrame).fill(Theme.frame))
+                            .shadow(radius: Consts.UI.shadowRadius)
+                        
+                        Image(systemName: "cloud.fill")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(Theme.color30)
+                        // .frame(height: 150)
+                            .frame(maxWidth: 150, maxHeight: 150) // Set the maximum width and height
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: Consts.UI.cornerRadiusFrame)
+                                .fill(Theme.frame))
+                            .shadow(radius: Consts.UI.shadowRadius)
+                    }
+                }
+                
+            } // END OF MAIN VSTACK
+            //  .navigationTitle("AINAO NAV") // Set the navigation bar title
+            .navigationBarTitleDisplayMode(.inline)
+            
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("AINAO NAV")
+                        .bold()
+                        .font(.title)
+                        .foregroundColor(Theme.color10)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        isEditingProfile.toggle()
+                    }) {
+                        CircleImageView(image: userProfile.profileImage.image, size: 75)
+                    }
+                    .accentColor(.white)
+                }
+            }
+            .toolbarBackground(.hidden, for: .navigationBar) // Make the toolbar background transparent
+            
+            .sheet(isPresented: $isEditingProfile) {
+                // Profile editing sheet
+                ProfileScreenView(userProfile : userProfile, isEditingProfile: $isEditingProfile)
+            }
+            
+            
+        } // END OF MAIN ZSTACK
+    } // End of NavigationView
+        .ignoresSafeArea()
+    
+} // END OF VAR BODY
+}
+
+struct LandingScreenView_Previews: PreviewProvider {
+    @State static var isLandingScreenView = true // Initialize the state variable
+    @State static var cameraPosition: MapCameraPosition = .automatic // Automatic means that it will center on markers set on the map
+    
+    static var previews: some View {
+        LandingScreenView(userProfile: UserProfile(), isLandingScreenView: $isLandingScreenView,cameraPosition: $cameraPosition)
+    }
+}
+
